@@ -2,6 +2,7 @@
 
 from sys import argv
 import xml.etree.ElementTree as ET
+import csv
 
 tree = ET.parse(argv[1])
 
@@ -26,21 +27,20 @@ tree = ET.parse(argv[1])
 # </Report>
 # </NessusClientData_v2>
 
+all_info = list()
 for host in tree.findall('Report/ReportHost'):
-  ipaddr = host.find("HostProperties/tag/[@name='host-ip']").text
+    ipaddr = host.find("HostProperties/tag/[@name='host-ip']").text
+    for item in host.findall('ReportItem'):
+        # risk_factor = item.find('risk_factor').text
+        # pluginID = item.get('pluginID')
+        # pluginName = item.get('pluginName')
+        # port = item.get('port')
+        # protocol = item.get('protocol')
+        cve = item.get('cve')
+        res = [ipaddr, cve]
+        all_info.append(res)
+        res = list()
 
-  for item in host.findall('ReportItem'):
-    risk_factor = item.find('risk_factor').text
-    pluginID = item.get('pluginID')
-    pluginName = item.get('pluginName')
-    port = item.get('port')
-    protocol = item.get('protocol')
-  
-    print(
-      ipaddr + ',' + \
-      risk_factor + ',' + \
-      port + '/' + protocol + ',' + \
-      pluginID + ',' + \
-      '"' + pluginName + '"'
-    )
-
+with open('parse_result.csv', 'w', newline='') as file:
+    wr = csv.writer(file, quoting=csv.QUOTE_ALL, dialect='excel')
+    wr.writerows(all_info)
