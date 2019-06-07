@@ -30,16 +30,13 @@ tree = ET.parse(argv[1])
 all_info = list()
 for host in tree.findall('Report/ReportHost'):
     ipaddr = host.find("HostProperties/tag/[@name='host-ip']").text
-    for item in host.findall('ReportItem'):
-        # risk_factor = item.find('risk_factor').text
-        # pluginID = item.get('pluginID')
-        # pluginName = item.get('pluginName')
-        # port = item.get('port')
-        # protocol = item.get('protocol')
-        cve = item.get('cve')
-        res = [ipaddr, cve]
-        all_info.append(res)
-        res = list()
+    try:
+        cve = host.find('HostProperties/tag/[@name="patch-summary-total-cves"]').text
+    except:
+        cve = None
+    res = [ipaddr, cve]
+    all_info.append(res)
+
 
 with open('parse_result.csv', 'w', newline='') as file:
     wr = csv.writer(file, quoting=csv.QUOTE_ALL, dialect='excel')
